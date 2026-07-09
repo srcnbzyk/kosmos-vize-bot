@@ -1,37 +1,55 @@
 # Appointment Availability Checker
 
-This Python script checks appointment availability on the Kosmos Visa system for the next 30 days and sends a notification to a specified Telegram chat when appointments are available. The script runs in a loop and checks for new appointments every 10 minutes.
+Kosmos Vize sisteminde sonraki N gun icin randevu musaitligini kontrol eder; bulursa Telegram'a bildirir.
 
-## Features
-- Fetches appointment quota information for a specified nationality, dealer, and appointment type.
-- Sends Telegram notifications when new appointments are available.
-- Configurable for different application types and appointment types.
+## Onemli (2026 guncellemesi)
 
-## Prerequisites
+Canli frontend/API kontrolune gore:
 
-To run this script, you need the following:
+- Endpoint ayni: `GetAppointmentHourQoutaInfo` (eski yazim: Qouta)
+- Parametre isimleri ayni: `nationalityNumber`, `dealerId`, `date`, `appointmentTypeId`, `onlyAvailable`, `applicationType`
+- **Yeni parametre:** `recaptchaToken`
+- **Yeni auth:** endpoint `401` + `WWW-Authenticate: Bearer` donuyor; login sonrasi Bearer token gerekebilir
+- `appointmentTypeId` degerleri: `16` STANDARD, `18` VIP, `2339` EEA_AB_SPOUSE, **yeni** `2472` BT
+- `dealerId` listesi genisledi ama eski ID'ler duruyor (1 Istanbul, 5 Izmir, 1014 Ankara, 1017 Edirne, ...)
 
-1. **Python 3.x** installed on your machine.
-2. Install the required libraries using `pip`:
-    ```bash
-    pip install curl_cffi
-    ```
+## Kurulum
 
-## How to Use
+```bash
+pip install -r requirements.txt
+cp .env.example .env
+```
 
-1. **Clone or Download the Repository**  
-   Clone the repository or download the script to your local machine.
+`.env` dosyasini kendi degerlerinle doldur.
 
-2. **Set Your Configuration**  
-   Modify the following in the script with your own values:
-   - `TELEGRAM_BOT_TOKEN`: Your Telegram bot token. Create a bot using [BotFather](https://core.telegram.org/bots#botfather) if you don't have one.
-   - `CHAT_ID`: The chat ID where you want to receive notifications. You can find this by messaging your bot and inspecting the response.
-   - `nationality_number`: Set the nationality number for the applicant.
-   - `dealer_id`: Set the dealer ID for your case.
-   - `application_type`: Choose between `INDIVIDUAL` or `FAMILY` for the application type.
-   - `appointment_type`: Choose between `STANDARD`, `VIP`, or `EEA_AB_SPOUSE` for the appointment type.
+## Calistirma
 
-3. **Run the Script**  
-   Run the script using Python:
-   ```bash
-   python bot.py
+```bash
+python bot.py
+```
+
+## Hatirlatma davranisi
+
+Musait randevu bulununca Telegram'a bildirim baslar ve sen `Tamam.` yazana kadar devam eder:
+
+1. Ilk **1 dakika**: her **10 saniye**
+2. Sonraki **2 dakika**: her **30 saniye**
+3. Sonraki **7 dakika**: her **1 dakika**
+4. Sonrasinda da her **1 dakika** (durdurulana kadar)
+
+Durdurmak icin botun yazdigi sohbete `Tamam` veya `Tamam.` yazman yeterli.
+
+## .env alanlari
+
+| Alan | Aciklama |
+|------|----------|
+| `TELEGRAM_BOT_TOKEN` | BotFather token |
+| `TELEGRAM_CHAT_ID` | Bildirim chat ID |
+| `NATIONALITY_NUMBER` | TC / nationalityNumber |
+| `DEALER_ID` | Ofis ID (`/api/Dealers`) |
+| `APPLICATION_TYPE` | `INDIVIDUAL` veya `FAMILY` |
+| `APPOINTMENT_TYPE` | `STANDARD`, `VIP`, `EEA_AB_SPOUSE`, `BT` |
+| `AUTH_TOKEN` | Opsiyonel Bearer token |
+| `RECAPTCHA_TOKEN` | Opsiyonel reCAPTCHA token |
+| `DAYS_AHEAD` | Kac gun ileri (varsayilan 30) |
+| `CHECK_INTERVAL_SECONDS` | Dongu araligi (varsayilan 300 = 5 dk) |

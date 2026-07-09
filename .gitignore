@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+_tmp_*.js
+_tmp_*.py
+_probe_*.py
+_mine_*.py
+_extract_*.py
+_metadata.xml
+*.log
